@@ -1,0 +1,115 @@
+@import url('global.css');
+
+/* Index Page Specific Styles */
+
+body {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.container {
+    padding: 40px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    animation: fadeInContainer 0.5s ease-in;
+    align-items: flex-start;
+    border: 1px solid #ddd;
+}
+
+.leftColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.rightColumn {
+    display: flex;
+    flex-direction: column;
+}
+
+.createRoomSection, .joinPrivateSection, .joinPublicSection {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 25px;
+    background: #fafafa;
+    border-radius: 6px;
+    width: 280px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: box-shadow 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.createRoomSection:hover, .joinPrivateSection:hover, .joinPublicSection:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.createRoomSection h3, .joinPrivateSection h3, .joinPublicSection h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Override button styles for index page */
+button {
+    padding: 10px 18px;
+}
+
+input[type="text"] {
+    width: 100%;
+}
+
+.toggleLabel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    color: #555;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.toggleLabel input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #666;
+}
+
+.publicRoomEntry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin: 4px 0;
+    border-radius: 4px;
+    background: #fff;
+    transition: all 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.publicRoomEntry:hover {
+    background: #f8f8f8;
+    border-color: #ccc;
+}
+
+.publicRoomEntry span {
+    color: #333;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.publicRoomEntry button {
+    padding: 6px 14px;
+    font-size: 13px;
+}

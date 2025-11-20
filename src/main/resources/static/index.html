@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chatroom Home</title>
+        <link rel="stylesheet" href="index.css" />
+        <script type="module">
+            import { Userbox } from "/userbox_widget.js";
+            Userbox.init({
+                doLoginRegister: true
+            });
+        </script>
+    </head>
+
+    <body>
+
+        <div class="container">
+            <div class="leftColumn">
+                <div class="createRoomSection">
+                    <h3>Create Room</h3>
+                    <input type="text" id="newRoomName" placeholder="Room Name" />
+
+                    <label class="toggleLabel">
+                        <input type="checkbox" id="publicToggle" />
+                        Public Room
+                    </label>
+
+                    <button id="createRoomBtn">Create</button>
+                </div>
+
+                <div class="joinPrivateSection">
+                    <h3>Join Room</h3>
+                    <input type="text" id="privateRoomId" placeholder="Room ID" />
+                    <button id="joinPrivateBtn">Join</button>
+                </div>
+            </div>
+
+            <div class="rightColumn">
+                <div class="joinPublicSection">
+                    <h3>Public Rooms</h3>
+                    <div id="publicRoomsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <script src="landing_page.js" type="module"></script>
+    </body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chat Room</title>
+        <link rel="stylesheet" href="room.css" />
+        <script type="module">
+            import { Userbox } from "/userbox_widget.js";
+            Userbox.init({
+                doLoginRegister: false
+            });
+        </script>
+    </head>
+    <body>
+
+        <div id="messageContainer" class="messages"></div>
+
+        <div class="inputArea">
+            <input id="contentInput" type="text" placeholder="Message content" class="content" />
+            <button id="sendBtn">Send Message</button>
+        </div>
+
+        <button id="scrollDownBtn">↓</button>
+
+        <script type="module" src="room.js"></script>
+    </body>
+</html>
