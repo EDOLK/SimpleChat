@@ -12,12 +12,15 @@ public class Application {
 	}
 
     public static String generateRandomString(int length){
-        String CHARS = "abcdefghijklmnopqrstuvwxyz1234567890";
+        return generateRandomString(length, "abcdefghijklmnopqrstuvwxyz1234567890");
+    }
+
+    public static String generateRandomString(int length, String chars){
         StringBuilder strBuilder = new StringBuilder();
         Random rnd = new Random();
         while (strBuilder.length() < length) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * CHARS.length());
-            strBuilder.append(CHARS.charAt(index));
+            int index = (int) (rnd.nextFloat() * chars.length());
+            strBuilder.append(chars.charAt(index));
         }
         String str = strBuilder.toString();
         return str;
