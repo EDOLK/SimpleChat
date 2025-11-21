@@ -9,18 +9,20 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.simplechat.cookies.Cookies;
-import com.simplechat.cookies.Cookies.InvalidCookieException;
 import com.simplechat.rooms.Room;
 import com.simplechat.rooms.RoomCache.RoomNotFoundException;
 import com.simplechat.rooms.RoomMessage;
@@ -40,8 +42,8 @@ public class ApiController {
 
     @PostMapping("/api/newroom")
     public String getNewRoom(@RequestBody RoomRequest request, @CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
-        User checkCookie = checkCookie(userCookie);
-        Room room = Rooms.getRoomCache().makeRoom(request, checkCookie);
+        User user = Cookies.getUser(userCookie);
+        Room room = Rooms.getRoomCache().makeRoom(request, user);
         room.sendMessage(new RoomMessage("John Computer", "Your room id is: " + room.getRoomId()));
         return room.getRoomId();
     }
@@ -58,26 +60,48 @@ public class ApiController {
 
     @GetMapping("/api/messages")
     public List<RoomMessage> getMessages(@RequestParam(name = "id", required = true) String id, @CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
-        checkCookie(userCookie);
+        Cookies.getUser(userCookie);
         return Rooms.getRoomCache().getRoomById(id).getMessages();
     }
 
     @GetMapping("/api/publicrooms")
     public List<String> getPublicRooms() throws Exception{
-        return Rooms.getRoomCache().getPublicRooms().stream()
+        return Rooms.getRoomCache().getPublicRooms()
             .map(r -> r.getName())
             .collect(Collectors.toList());
     }
 
     @GetMapping("/api/roomnametoid")
     public String getIdFromName(@RequestParam(name = "name", required = true) String name, @CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
-        checkCookie(userCookie);
+        Cookies.getUser(userCookie);
         Room room = Rooms.getRoomCache().getRoomByName(name);
         if (room.isPublic()) {
             return room.getRoomId();
         }
         throw new RoomNotFoundException();
     }
+
+    @DeleteMapping("/api/room")
+    public ResponseEntity<Void> deleteRoom(@RequestParam(name = "id", required = true) String roomId, @CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
+        User user = Cookies.getUser(userCookie);
+        Room room = Rooms.getRoomCache().getRoomById(roomId);
+        if (room.getOwner() == user) {
+            Rooms.getRoomCache().deleteRoom(room);
+            return ResponseEntity.ok().build();
+        }
+        throw new InvalidRoomPermissionException();
+    }
+
+    @GetMapping("/api/myrooms")
+    public List<String> getUsersRooms(@CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
+        User user = Cookies.getUser(userCookie);
+        return Rooms.getRoomCache().getRoomsByOwner(user)
+            .map((r) -> r.getName())
+            .collect(Collectors.toList());
+    }
+
+    @ResponseStatus(value=HttpStatus.UNAUTHORIZED, reason="You dont have permissions for this room.")
+    private static class InvalidRoomPermissionException extends Exception{}
 
     @PostMapping("/api/user/login")
     public ResponseEntity<Void> getCookieForUser(@RequestBody UserRequest request) throws Exception{
@@ -104,7 +128,7 @@ public class ApiController {
 
     @GetMapping("/api/user/refresh")
     public ResponseEntity<Void> refreshUserCookie(@CookieValue(name = "userCookie", required = true) String incomingUserCookie) throws Exception{
-        checkCookie(incomingUserCookie);
+        Cookies.getUser(incomingUserCookie);
         ResponseCookie userCookie = ResponseCookie.from("userCookie", incomingUserCookie)
             .httpOnly(true)
             .maxAge(Cookies.COOKIE_LIFETIME)
@@ -139,13 +163,6 @@ public class ApiController {
     public ResponseEntity<Void> registerNewUser(@RequestBody UserRequest request) throws Exception{
         Users.getUserCache().signUpNewUser(request.getUsername(), request.getPassword());
         return ResponseEntity.ok().build();
-    }
-
-    private static User checkCookie(String userCookie) throws InvalidCookieException{
-        if (userCookie != null) {
-            return Cookies.getUser(userCookie);
-        }
-        throw new InvalidCookieException();
     }
 
 

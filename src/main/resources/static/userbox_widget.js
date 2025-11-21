@@ -5,7 +5,7 @@ export const Userbox = {
     }
 }
 
-async function initialize_userbox(args) {
+async function initialize_userbox({ doLoginRegister = true, doLogout = true } = {}) {
     const linkId = 'userboxcss';
     if (!document.getElementById(linkId)) {
         const link = document.createElement('link');
@@ -46,15 +46,15 @@ async function initialize_userbox(args) {
         const text = await res.text();
 
         if (!res.ok) {
-            if (args.doLoginRegister) {
+            if (doLoginRegister) {
                 userBoxContent.innerHTML = `
                     <button id="loginBtn">Login</button>
                     <button id="registerBtn">Register</button>
                     `;
                 document.getElementById("loginBtn").onclick = () =>
-                    openForm("login");
+                    openForm("Login");
                 document.getElementById("registerBtn").onclick = () =>
-                    openForm("register");
+                    openForm("Register");
             } else {
                 userBoxContent.innerHTML = `<strong>Logged out</strong>`
             }
@@ -63,17 +63,18 @@ async function initialize_userbox(args) {
             const textElement = document.createElement("strong");
             textElement.textContent = text
             userBoxContent.appendChild(textElement)
-            const logoutButton = document.createElement("Button");
-            logoutButton.id = "logoutBtn"
-            logoutButton.textContent = "Logout"
-            userBoxContent.appendChild(logoutButton)
-
-            document.getElementById("logoutBtn").onclick = async () => {
-                await fetch("/api/user/logout", {
-                    method: "POST"
-                });
-                authModal.classList.add("hidden");
-                checkUser()
+            if (doLogout) {
+                const logoutButton = document.createElement("Button");
+                logoutButton.id = "logoutBtn"
+                logoutButton.textContent = "Logout"
+                userBoxContent.appendChild(logoutButton)
+                document.getElementById("logoutBtn").onclick = async () => {
+                    await fetch("/api/user/logout", {
+                        method: "POST"
+                    });
+                    authModal.classList.add("hidden");
+                    checkUser()
+                }
             }
         }
     }
@@ -82,7 +83,7 @@ async function initialize_userbox(args) {
         authModal.classList.remove("hidden");
 
         authModalContent.innerHTML = `
-            <h3>${type === "login" ? "Login" : "Register"}</h3>
+            <h3>${type === "Login" ? "Login" : "Register"}</h3>
             <input id="authUsername" type="text" placeholder="Username" />
             <input id="authPassword" type="password" placeholder="Password" />
             <button id="submitAuth">${type}</button>
@@ -97,7 +98,7 @@ async function initialize_userbox(args) {
             const password = document.getElementById("authPassword").value;
 
             const endpoint =
-                type === "login" ? "/api/user/login" : "/api/user/register";
+                type === "Login" ? "/api/user/login" : "/api/user/register";
 
             const res = await fetch(endpoint, {
                 method: "POST",
@@ -109,11 +110,11 @@ async function initialize_userbox(args) {
             });
 
             if (!res.ok) {
-                alert(type === "login" ? "Login failed" : "Registration failed");
+                alert(type === "Login" ? "Login failed" : "Registration failed");
                 return;
             }
 
-            if (type != "login") {
+            if (type != "Login") {
                 await fetch("/api/user/login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

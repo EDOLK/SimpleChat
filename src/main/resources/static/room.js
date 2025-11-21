@@ -11,7 +11,8 @@ const roomId = getRoomId();
 const messageContainer = document.getElementById('messageContainer');
 const contentInput = document.getElementById("contentInput");
 const sendBtn = document.getElementById("sendBtn");
-const scrollBtn = document.getElementById("scrollDownBtn");(scrollBtn);
+const scrollBtn = document.getElementById("scrollDownBtn");
+const backBtn = document.getElementById("backBtn");
 
 function isAtBottom() {
     return messageContainer.scrollHeight - messageContainer.scrollTop - messageContainer.clientHeight < 5;
@@ -142,6 +143,10 @@ messageContainer.addEventListener("scroll", updateScrollButton);
 scrollBtn.onclick = () => {
     messageContainer.scrollTop = messageContainer.scrollHeight;
     updateScrollButton();
+}
+
+backBtn.onclick = () => {
+    window.location.href = `/index.html`;
 }
 
 window.onload = initialLoad;

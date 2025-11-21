@@ -1,10 +1,9 @@
 package com.simplechat.rooms;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.simplechat.users.User;
 
@@ -33,16 +32,17 @@ public class InMemoryRoomCache implements RoomCache {
     }
 
     @Override
-    public List<Room> getPublicRooms() {
+    public Stream<Room> getPublicRooms() {
         return rooms.entrySet().stream()
-            .map((e) -> e.getValue())
-            .filter((r) -> r.isPublic())
-            .collect(Collectors.toList());
+            .map((e) -> (Room)e.getValue())
+            .filter((r) -> r.isPublic());
     }
 
     @Override
     public Room makeRoom(RoomRequest request, User owner) throws RoomNotCreatedException {
-        if (request.getRoomName().isBlank()) {
+        if (request.getRoomName().isBlank() || rooms.values().stream()
+                .map((r) -> r.getName())
+                .anyMatch((n) -> request.getRoomName().equals(n))) {
             throw new RoomNotCreatedException();
         }
         InMemoryRoom r = new InMemoryRoom(request.getRoomName(), request.isRoomPublic(), owner);
@@ -58,7 +58,18 @@ public class InMemoryRoomCache implements RoomCache {
         return r;
     }
 
-    
+    @Override
+    public void deleteRoom(Room room) throws RoomNotDeletedException {
+        if (rooms.remove(room.getRoomId()) == null) {
+            throw new RoomNotDeletedException();
+        }
+    }
 
+    @Override
+    public Stream<Room> getRoomsByOwner(User user) {
+        return rooms.values().stream()
+            .filter((r) -> r.getOwner() == user)
+            .map(r -> (Room)r);
+    }
 
 }
