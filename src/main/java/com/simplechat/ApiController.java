@@ -1,15 +1,11 @@
 package com.simplechat;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,12 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.simplechat.cookies.Cookies;
 import com.simplechat.rooms.Room;
-import com.simplechat.rooms.RoomCache.RoomNotFoundException;
 import com.simplechat.rooms.RoomMessage;
 import com.simplechat.rooms.RoomQuery;
 import com.simplechat.rooms.RoomRequest;
 import com.simplechat.rooms.Rooms;
-import com.simplechat.rooms.SendMessageRequest;
 import com.simplechat.users.User;
 import com.simplechat.users.UserRequest;
 import com.simplechat.users.Users;
