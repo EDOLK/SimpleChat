@@ -3,12 +3,16 @@ package com.simplechat.rooms;
 import com.simplechat.users.User;
 
 public class RoomQuery {
-    private boolean publicRoom;
+    private boolean publicRooms;
+    private boolean privateRooms;
     private String name;
     private User user;
     private RoomQuery(){};
-    public boolean isPublicRoom() {
-        return publicRoom;
+    public boolean isPrivateRooms() {
+        return privateRooms;
+    }
+    public boolean isPublicRooms() {
+        return publicRooms;
     }
     public String getName() {
         return name;
@@ -19,11 +23,13 @@ public class RoomQuery {
 
     public static class Builder {
         private RoomQuery query = new RoomQuery();
-        public Builder(){
-
+        public Builder(){}
+        public Builder withPublicRooms(boolean publicRooms) {
+            this.query.publicRooms = publicRooms;
+            return this;
         }
-        public Builder withPublicRoom(boolean publicRoom) {
-            this.query.publicRoom = publicRoom;
+        public Builder withPrivateRooms(boolean privateRooms) {
+            this.query.privateRooms = privateRooms;
             return this;
         }
         public Builder withName(String name) {

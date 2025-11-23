@@ -51,7 +51,7 @@ public class InMemoryRoomCache implements RoomCache {
         return rooms.values().stream()
             .filter(r -> query.getUser() != null ? r.getOwner() == query.getUser() : true)
             .filter(r -> query.getName() != null ? r.getName().equals(query.getName()) : true)
-            .filter(r -> r.isPublic() == query.isPublicRoom())
+            .filter(r -> (query.isPublicRooms() && r.isPublic()) || (query.isPrivateRooms() && !r.isPublic()))
             .collect(Collectors.toList());
     }
 

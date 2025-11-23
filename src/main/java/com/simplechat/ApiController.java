@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.simplechat.cookies.Cookies;
+import com.simplechat.cookies.Cookies.InvalidCookieException;
 import com.simplechat.rooms.Room;
 import com.simplechat.rooms.RoomMessage;
 import com.simplechat.rooms.RoomQuery;
@@ -84,21 +85,24 @@ public class ApiController {
 
     @GetMapping("/api/rooms")
     public Collection<Room> getRooms(
-        @RequestParam(name = "public", required = false, defaultValue = "true") boolean publicRoom,
+        @RequestParam(name = "public", required = false, defaultValue = "true") boolean publicRooms,
+        @RequestParam(name = "private", required = false, defaultValue = "false") boolean privateRooms,
+        @RequestParam(name = "own", required = false, defaultValue = "false") boolean ownRooms,
         @RequestParam(name = "name", required = false) String roomName,
-        @RequestParam(name = "own", required = false) boolean ownRooms,
         @CookieValue(name = "userCookie", required = false) String userCookie
     ) throws Exception{
         User requester = null;
-        if (!publicRoom) {
-            if (userCookie == null)
-                throw new Cookies.NoCookieException();
+        if (privateRooms || ownRooms) {
+            if (userCookie == null) {
+                throw new InvalidCookieException();
+            }
             requester = Cookies.getUser(userCookie);
         }
         RoomQuery roomQuery = new RoomQuery.Builder()
-            .withPublicRoom(publicRoom)
+            .withPublicRooms(publicRooms)
+            .withPrivateRooms(privateRooms)
             .withName(roomName)
-            .withUser(requester)
+            .withUser(ownRooms ? requester : null)
             .build();
         return Rooms.getRoomCache().getRooms(roomQuery);
     }
