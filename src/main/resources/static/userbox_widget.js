@@ -42,8 +42,8 @@ async function initialize_userbox({ doLoginRegister = true, doLogout = true } = 
     const authModalContent = document.getElementById("authModalContent");
 
     async function checkUser() {
-        const res = await fetch("/api/user/check");
-        const text = await res.text();
+        const res = await fetch("/api/user");
+        const user = await res.json();
 
         if (!res.ok) {
             if (doLoginRegister) {
@@ -61,7 +61,7 @@ async function initialize_userbox({ doLoginRegister = true, doLogout = true } = 
         } else {
             userBoxContent.textContent = "Logged in as: ";
             const textElement = document.createElement("strong");
-            textElement.textContent = text
+            textElement.textContent = user.username
             userBoxContent.appendChild(textElement)
             if (doLogout) {
                 const logoutButton = document.createElement("Button");

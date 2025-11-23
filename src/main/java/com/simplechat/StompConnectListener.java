@@ -48,5 +48,4 @@ public class StompConnectListener {
         return Optional.empty();
     }
 
-    
 }

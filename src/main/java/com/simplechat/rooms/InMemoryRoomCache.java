@@ -1,15 +1,15 @@
 package com.simplechat.rooms;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import com.simplechat.users.User;
 
 public class InMemoryRoomCache implements RoomCache {
 
-    private Map<String, InMemoryRoom> rooms = new HashMap<>();
+    private Map<String, Room> rooms = new HashMap<>();
 
     @Override
     public Room getRoomById(String id) throws RoomNotFoundException {
@@ -20,32 +20,13 @@ public class InMemoryRoomCache implements RoomCache {
     }
 
     @Override
-    public Room getRoomByName(String name) throws RoomNotFoundException{
-        Optional<Room> ropt = rooms.entrySet().stream()
-            .map(e -> (Room)e.getValue())
-            .filter(r -> r.getName().equals(name))
-            .findFirst();
-        if (ropt.isPresent()) {
-            return ropt.get();
-        }
-        throw new RoomNotFoundException();
-    }
-
-    @Override
-    public Stream<Room> getPublicRooms() {
-        return rooms.entrySet().stream()
-            .map((e) -> (Room)e.getValue())
-            .filter((r) -> r.isPublic());
-    }
-
-    @Override
     public Room makeRoom(RoomRequest request, User owner) throws RoomNotCreatedException {
         if (request.getRoomName().isBlank() || rooms.values().stream()
                 .map((r) -> r.getName())
                 .anyMatch((n) -> request.getRoomName().equals(n))) {
             throw new RoomNotCreatedException();
         }
-        InMemoryRoom r = new InMemoryRoom(request.getRoomName(), request.isRoomPublic(), owner);
+        Room r = new InMemoryRoom(request.getRoomName(), request.isRoomPublic(), owner);
         int tries = 1;
         while (rooms.containsKey(r.getRoomId()) && tries <= 10) {
             r = new InMemoryRoom(request.getRoomName(), request.isRoomPublic(), owner);
@@ -66,10 +47,12 @@ public class InMemoryRoomCache implements RoomCache {
     }
 
     @Override
-    public Stream<Room> getRoomsByOwner(User user) {
+    public Collection<Room> getRooms(RoomQuery query) {
         return rooms.values().stream()
-            .filter((r) -> r.getOwner() == user)
-            .map(r -> (Room)r);
+            .filter(r -> query.getUser() != null ? r.getOwner() == query.getUser() : true)
+            .filter(r -> query.getName() != null ? r.getName().equals(query.getName()) : true)
+            .filter(r -> r.isPublic() == query.isPublicRoom())
+            .collect(Collectors.toList());
     }
 
 }

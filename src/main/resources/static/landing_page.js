@@ -1,29 +1,25 @@
 // Fetch public rooms on load
 async function loadPublicRooms() {
     try {
-        const res = await fetch("/api/publicrooms");
-        const roomsNames = await res.json();
+        const res = await fetch("/api/rooms");
+        const rooms = await res.json();
 
         const listContainer = document.getElementById("publicRoomsList");
         listContainer.innerHTML = "";
 
-        for (let index = 0; index < roomsNames.length; index++) {
-            const roomName = roomsNames[index];
+        for (let index = 0; index < rooms.length; index++) {
+            const room = rooms[index];
 
             const div = document.createElement("div");
             div.className = "publicRoomEntry";
 
             const nameSpan = document.createElement("span");
-            nameSpan.textContent = roomName;
+            nameSpan.textContent = room.name;
 
             const joinBtn = document.createElement("button");
             joinBtn.textContent = "Join";
             joinBtn.onclick = async () => {
-                const res = await fetch(`/api/roomnametoid?name=${encodeURIComponent(roomName)}`);
-                if (res.ok) {
-                    const data = await res.text();
-                    window.location.href = `/room?id=${data}`;
-                }
+                window.location.href = `/room?id=${room.roomId}`;
             };
 
             div.appendChild(nameSpan);
@@ -43,7 +39,7 @@ async function createRoom() {
 
     if (!roomName) return;
 
-    const res = await fetch('/api/newroom',
+    const res = await fetch('/api/rooms',
         {
             method: 'POST',
             headers: {
@@ -56,8 +52,8 @@ async function createRoom() {
         }
     );
     if (res.ok) {
-        const data = await res.text();
-        window.location.href = `/room?id=${data}`;
+        const room = await res.json();
+        window.location.href = `/room?id=${room.roomId}`;
     }
 }
 
@@ -68,10 +64,14 @@ async function joinPrivateRoom() {
     if (!roomId) return;
 
     try {
-        const res = await fetch(`/api/checkroom?id=${encodeURIComponent(roomId)}`);
-        const exists = await res.json();
 
-        if (exists) {
+        const res = await fetch(`/api/rooms/${encodeURIComponent(roomId)}`,
+            {
+                method: 'HEAD',
+            }
+        );
+
+        if (res.ok) {
             window.location.href = `/room?id=${roomId}`;
         } else {
             alert("Room not found");

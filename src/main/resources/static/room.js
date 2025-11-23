@@ -43,7 +43,7 @@ async function initialLoad() {
 async function loadAllMessages(roomId){
 
     try {
-        const res = await fetch(`/api/messages?id=${roomId}`);
+        const res = await fetch(`/api/rooms/${roomId}/messages`);
         if (res.ok) {
             const messages = await res.json();
             for (let index = 0; index < messages.length; index++) {

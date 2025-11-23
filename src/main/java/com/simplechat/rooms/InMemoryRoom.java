@@ -27,6 +27,7 @@ public class InMemoryRoom implements Room{
     public InMemoryRoom(String name, boolean roomPublic, User owner) {
         this.name = name;
         this.roomPublic = roomPublic;
+        this.owner = owner;
     }
 
     public InMemoryRoom() {

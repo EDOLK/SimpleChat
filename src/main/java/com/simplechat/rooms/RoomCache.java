@@ -1,6 +1,6 @@
 package com.simplechat.rooms;
 
-import java.util.stream.Stream;
+import java.util.Collection;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.simplechat.users.User;
 
 public interface RoomCache {
+    public Collection<Room> getRooms(RoomQuery query);
     public Room getRoomById(String id) throws RoomNotFoundException;
-    public Room getRoomByName(String name) throws RoomNotFoundException;
-    public Stream<Room> getRoomsByOwner(User user);
-    public Stream<Room> getPublicRooms();
     public Room makeRoom(RoomRequest request, User owner) throws RoomNotCreatedException;
     public void deleteRoom(Room room) throws RoomNotDeletedException;
 

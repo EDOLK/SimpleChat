@@ -23,13 +23,18 @@ public class Rooms {
     }
 
     public static RoomMessage sendMessage(SendMessageRequest request, String sessionId) throws Exception{
-        Room room = roomCache.getRoomById(request.getRoomId());
         Optional<User> user = StompConnectListener.getUserForSession(sessionId);
         if (user.isPresent()) {
-            RoomMessage message = new RoomMessage(user.get().getUsername(), request.getMessage());
-            if (room.sendMessage(message)) {
-                return message;
-            }
+            return sendMessage(request, user.get());
+        }
+        throw new MessageNotSentException();
+    }
+
+    public static RoomMessage sendMessage(SendMessageRequest request, User user) throws Exception{
+        Room room = roomCache.getRoomById(request.getRoomId());
+        RoomMessage message = new RoomMessage(user.getUsername(), request.getMessage());
+        if (room.sendMessage(message)) {
+            return message;
         }
         throw new MessageNotSentException();
     }

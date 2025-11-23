@@ -6,6 +6,11 @@ public class SendMessageRequest {
 
     private String message;
 
+    public SendMessageRequest(String roomId, String message) {
+        this.roomId = roomId;
+        this.message = message;
+    }
+
     public String getMessage() {
         return message;
     }
