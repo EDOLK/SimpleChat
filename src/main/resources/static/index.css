@@ -1,13 +1,10 @@
-@import url('global.css');
-
-/* Index Page Specific Styles */
-
 body {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 30px;
+    overflow: hidden;
 }
 
 .container {
@@ -21,17 +18,21 @@ body {
     animation: fadeInContainer 0.5s ease-in;
     align-items: flex-start;
     border: 1px solid #ddd;
+    height: 30rem;
 }
 
 .leftColumn {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    height: 100%;
+    justify-content: space-between;
 }
 
 .rightColumn {
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 .createRoomSection, .joinPrivateSection, .joinPublicSection {
@@ -45,6 +46,11 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     transition: box-shadow 0.2s ease;
     border: 1px solid #e0e0e0;
+    overflow: auto;
+}
+
+#publicRoomsList {
+    overflow: auto;
 }
 
 .createRoomSection:hover, .joinPrivateSection:hover, .joinPublicSection:hover {
