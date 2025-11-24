@@ -1,95 +1,109 @@
-// Fetch public rooms on load
-async function loadPublicRooms() {
-    try {
-        const res = await fetch("/api/rooms");
-        const rooms = await res.json();
 
-        const listContainer = document.getElementById("publicRoomsList");
-        listContainer.innerHTML = "";
+const roomDivs = new Map();
 
-        if (rooms.length <= 0) {
-            document.getElementsByClassName("middleColumn")[0].style.display = 'none';
-        }
+async function loadRooms(){
+    fetch("/api/rooms")
+        .then(resToJson)
+        .then((rooms) => populateRoomContainer(rooms, true, false, document.getElementById("publicRoomsList"), document.getElementsByClassName("middleColumn")[0]))
+        .catch(logRoomLoadError);
+    fetch("/api/rooms?own=true&private=true&public=true")
+        .then(resToJson)
+        .then((rooms) => populateRoomContainer(rooms, true, true, document.getElementById("userRoomsList"), document.getElementsByClassName("rightColumn")[0]))
+        .catch(logRoomLoadError);
+}
 
-        for (let index = 0; index < rooms.length; index++) {
-            const room = rooms[index];
+async function resToJson(res){
+    if (res.ok) {
+        return res.json();
+    }
+    return [];
+}
 
-            const div = document.createElement("div");
-            div.className = "publicRoomEntry";
+async function logRoomLoadError(error){
+    console.error("Failed to load rooms", error);
+}
 
-            const nameSpan = document.createElement("span");
-            nameSpan.textContent = room.name;
+async function populateRoomContainer(rooms, join, del, container, outerContainer){
+    container.innerHTML = "";
 
-            const joinBtn = document.createElement("button");
-            joinBtn.textContent = "Join";
-            joinBtn.onclick = async () => {
-                const res = await fetch("/api/user/refresh", {
-                    method: 'HEAD'
-                });
-                if (res.ok) {
-                    window.location.href = `/room?id=${room.roomId}`;
-                }
-            };
+    if (rooms.length <= 0) {
+        outerContainer.style.display = 'none';
+    }
 
-            div.appendChild(nameSpan);
-            div.appendChild(joinBtn);
-            listContainer.appendChild(div);
-        }
+    for (let index = 0; index < rooms.length; index++) {
+        const room = rooms[index];
 
-    } catch (err) {
-        console.error("Failed to load public rooms", err);
+        container.appendChild(createRoomEntry({
+            room: room,
+            join: join,
+            del: del
+        }))
     }
 }
 
-async function loadUserRooms() {
-    try {
-        const res = await fetch("/api/rooms?own=true&private=true&public=true");
-        const rooms = await res.json();
+function createRoomEntry({ room = null, join = true, del = false} = {}){
 
-        const listContainer = document.getElementById("userRoomsList");
-        listContainer.innerHTML = "";
-
-        if (!res.ok || rooms.length <= 0) {
-            document.getElementsByClassName("rightColumn")[0].style.display = 'none';
-        }
-
-        for (let index = 0; index < rooms.length; index++) {
-            const room = rooms[index];
-
-            const div = document.createElement("div");
-            div.className = "publicRoomEntry";
-
-            const nameSpan = document.createElement("span");
-            nameSpan.textContent = room.name;
-
-            const deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "❌";
-            deleteBtn.onclick = async () => {
-                const res = await fetch(`api/rooms/` + room.roomId,
-                    {
-                        method: 'DELETE',
-                    }
-                )
-                if (res.ok) {
-                    div.style.display = 'none'
-                }
-            };
-
-            const joinBtn = document.createElement("button");
-            joinBtn.textContent = "Join";
-            joinBtn.onclick = async () => {
-                window.location.href = `/room?id=${room.roomId}`;
-            };
-
-            div.appendChild(nameSpan);
-            div.appendChild(deleteBtn);
-            div.appendChild(joinBtn);
-            listContainer.appendChild(div);
-        }
-
-    } catch (err) {
-        console.error("Failed to load public rooms", err);
+    if (!room) {
+        return document.createElement("div");
     }
+
+    const div = document.createElement("div");
+    div.className = "publicRoomEntry";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = room.name;
+
+    const btnDiv = document.createElement("div")
+    btnDiv.style.cssText = "display: flex; flex-direction: row; justify-content: flex-end; gap: 5px;"
+
+    div.appendChild(nameSpan);
+
+    if (join) {
+
+        const joinBtn = document.createElement("button");
+        joinBtn.textContent = "Join";
+        joinBtn.onclick = async () => {
+            const res = await fetch("/api/user/refresh", {
+                method: 'HEAD'
+            });
+            if (res.ok) {
+                window.location.href = `/room?id=${room.roomId}`;
+            }
+        };
+
+        btnDiv.appendChild(joinBtn);
+    }
+
+    if (del) {
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "❌";
+        deleteBtn.onclick = async () => {
+            const res = await fetch(`api/rooms/` + room.roomId,
+                {
+                    method: 'DELETE',
+                }
+            )
+            if (res.ok) {
+                roomDivs.get(room.roomId).forEach((div) => {
+                    div.style.display = 'none'
+                })
+            }
+        };
+
+        btnDiv.appendChild(deleteBtn);
+    }
+
+    div.appendChild(btnDiv);
+
+    if (roomDivs.has(room.roomId)) {
+        roomDivs.get(room.roomId).push(div);
+    } else {
+        roomDivs.set(room.roomId, [div])
+    }
+
+    return div;
+
 }
 
 // Create room
@@ -131,7 +145,13 @@ async function joinPrivateRoom() {
             }
         );
 
-        if (res.ok) {
+        const resUser = await fetch(`/api/user/refresh`,
+            {
+                method: 'HEAD',
+            }
+        );
+
+        if (res.ok && resUser.ok) {
             window.location.href = `/room?id=${roomId}`;
         } else {
             alert("Room not found");
@@ -145,6 +165,5 @@ async function joinPrivateRoom() {
 document.getElementById("createRoomBtn").addEventListener("click", createRoom);
 document.getElementById("joinPrivateBtn").addEventListener("click", joinPrivateRoom);
 
-// Load public rooms at startup
-loadPublicRooms();
-loadUserRooms();
+// Load rooms at startup
+loadRooms();
