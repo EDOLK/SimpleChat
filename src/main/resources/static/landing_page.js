@@ -7,6 +7,10 @@ async function loadPublicRooms() {
         const listContainer = document.getElementById("publicRoomsList");
         listContainer.innerHTML = "";
 
+        if (rooms.length <= 0) {
+            document.getElementsByClassName("middleColumn")[0].style.display = 'none';
+        }
+
         for (let index = 0; index < rooms.length; index++) {
             const room = rooms[index];
 
@@ -19,10 +23,66 @@ async function loadPublicRooms() {
             const joinBtn = document.createElement("button");
             joinBtn.textContent = "Join";
             joinBtn.onclick = async () => {
+                const res = await fetch("/api/user/refresh", {
+                    method: 'HEAD'
+                });
+                if (res.ok) {
+                    window.location.href = `/room?id=${room.roomId}`;
+                }
+            };
+
+            div.appendChild(nameSpan);
+            div.appendChild(joinBtn);
+            listContainer.appendChild(div);
+        }
+
+    } catch (err) {
+        console.error("Failed to load public rooms", err);
+    }
+}
+
+async function loadUserRooms() {
+    try {
+        const res = await fetch("/api/rooms?own=true&private=true&public=true");
+        const rooms = await res.json();
+
+        const listContainer = document.getElementById("userRoomsList");
+        listContainer.innerHTML = "";
+
+        if (!res.ok || rooms.length <= 0) {
+            document.getElementsByClassName("rightColumn")[0].style.display = 'none';
+        }
+
+        for (let index = 0; index < rooms.length; index++) {
+            const room = rooms[index];
+
+            const div = document.createElement("div");
+            div.className = "publicRoomEntry";
+
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = room.name;
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "❌";
+            deleteBtn.onclick = async () => {
+                const res = await fetch(`api/rooms/` + room.roomId,
+                    {
+                        method: 'DELETE',
+                    }
+                )
+                if (res.ok) {
+                    div.style.display = 'none'
+                }
+            };
+
+            const joinBtn = document.createElement("button");
+            joinBtn.textContent = "Join";
+            joinBtn.onclick = async () => {
                 window.location.href = `/room?id=${room.roomId}`;
             };
 
             div.appendChild(nameSpan);
+            div.appendChild(deleteBtn);
             div.appendChild(joinBtn);
             listContainer.appendChild(div);
         }
@@ -87,3 +147,4 @@ document.getElementById("joinPrivateBtn").addEventListener("click", joinPrivateR
 
 // Load public rooms at startup
 loadPublicRooms();
+loadUserRooms();

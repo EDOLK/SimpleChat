@@ -21,7 +21,7 @@ body {
     height: 30rem;
 }
 
-.leftColumn {
+.leftColumn, .middleColumn, .rightColumn {
     display: flex;
     flex-direction: column;
     gap: 30px;
@@ -29,13 +29,7 @@ body {
     justify-content: space-between;
 }
 
-.rightColumn {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.createRoomSection, .joinPrivateSection, .joinPublicSection {
+.createRoomSection, .joinPrivateSection, .joinPublicSection, .userRoomsSection {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -49,7 +43,7 @@ body {
     overflow: auto;
 }
 
-#publicRoomsList {
+#publicRoomsList, #userRoomsList {
     overflow: auto;
 }
 
@@ -57,7 +51,7 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
-.createRoomSection h3, .joinPrivateSection h3, .joinPublicSection h3 {
+.createRoomSection h3, .joinPrivateSection h3, .joinPublicSection h3, .userRoomsSection h3 {
     margin: 0 0 10px 0;
     color: #333;
     font-size: 18px;
