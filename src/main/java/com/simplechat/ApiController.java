@@ -63,10 +63,81 @@ public class ApiController {
         return Rooms.getRoomCache().getRoomById(roomId);
     }
 
+    @PostMapping("/api/rooms/{roomId}/banned")
+    public ResponseEntity<Void> banUserFromRoom(
+        @PathVariable String roomId,
+        @CookieValue(name = "userCookie", required = true) String userCookie,
+        @RequestBody String username
+    ) throws Exception{
+        Room room = Rooms.getRoomCache().getRoomById(roomId);
+        User requester = Cookies.getUser(userCookie);
+        if (room.getOwner() == requester) {
+            User toBeBanned = Users.getUserCache().getUser(username);
+            if (room.ban(toBeBanned)) {
+                return ResponseEntity.ok().build();
+            }
+        }
+        throw new InvalidRoomPermissionException();
+    }
+
+    @DeleteMapping("/api/rooms/{roomId}/banned")
+    public ResponseEntity<Void> unbanUserFromRoom(
+        @PathVariable String roomId,
+        @CookieValue(name = "userCookie", required = true) String userCookie,
+        @RequestBody String username
+    ) throws Exception{
+        Room room = Rooms.getRoomCache().getRoomById(roomId);
+        User requester = Cookies.getUser(userCookie);
+        if (room.getOwner() == requester) {
+            User toBeUnBanned = Users.getUserCache().getUser(username);
+            if (room.unBan(toBeUnBanned)) {
+                return ResponseEntity.ok().build();
+            }
+        }
+        throw new InvalidRoomPermissionException();
+    }
+
+    @PostMapping("/api/rooms/{roomId}/muted")
+    public ResponseEntity<Void> muteUserFromRoom(
+        @PathVariable String roomId,
+        @CookieValue(name = "userCookie", required = true) String userCookie,
+        @RequestBody String username
+    ) throws Exception{
+        Room room = Rooms.getRoomCache().getRoomById(roomId);
+        User requester = Cookies.getUser(userCookie);
+        if (room.getOwner() == requester) {
+            User toBeMuted = Users.getUserCache().getUser(username);
+            if (room.mute(toBeMuted)) {
+                return ResponseEntity.ok().build();
+            }
+        }
+        throw new InvalidRoomPermissionException();
+    }
+
+    @DeleteMapping("/api/rooms/{roomId}/muted")
+    public ResponseEntity<Void> unmuteUserFromRoom(
+        @PathVariable String roomId,
+        @CookieValue(name = "userCookie", required = true) String userCookie,
+        @RequestBody String username
+    ) throws Exception{
+        Room room = Rooms.getRoomCache().getRoomById(roomId);
+        User requester = Cookies.getUser(userCookie);
+        if (room.getOwner() == requester) {
+            User toBeUnMuted = Users.getUserCache().getUser(username);
+            if (room.unMute(toBeUnMuted)) {
+                return ResponseEntity.ok().build();
+            }
+        }
+        throw new InvalidRoomPermissionException();
+    }
+
     @GetMapping("/api/rooms/{roomId}/messages")
     public List<RoomMessage> getMessages(@PathVariable String roomId, @CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
-        Cookies.getUser(userCookie);
-        return Rooms.getRoomCache().getRoomById(roomId).getMessages();
+        User user = Cookies.getUser(userCookie);
+        Room room = Rooms.getRoomCache().getRoomById(roomId);
+        if (room.isBanned(user))
+            throw new InvalidRoomPermissionException();
+        return room.getMessages();
     }
 
     @DeleteMapping("/api/rooms/{roomId}")

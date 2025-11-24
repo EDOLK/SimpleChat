@@ -13,12 +13,14 @@ import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import com.simplechat.cookies.Cookies;
+import com.simplechat.rooms.Room;
+import com.simplechat.rooms.Rooms;
 import com.simplechat.users.User;
 
 @Component
 public class StompConnectListener {
 
-    private static Map<String, User> sessionToUserMap = new HashMap<>();
+    private static Map<String, SessionInfo> sessionMap = new HashMap<>();
 
     @EventListener
     public void onApplicationEvent(ApplicationEvent event) {
@@ -26,9 +28,11 @@ public class StompConnectListener {
             Map<String, Object> sessionAttributes = SimpMessageHeaderAccessor.getSessionAttributes(sce.getMessage().getHeaders());
             String id = SimpAttributesContextHolder.currentAttributes().getSessionId();
             String userCookie = (String) sessionAttributes.get("userCookie");
+            String roomId = (String) sessionAttributes.get("roomId");
             try {
                 User user = Cookies.getUser(userCookie);
-                sessionToUserMap.put(id, user);
+                Room room = Rooms.getRoomCache().getRoomById(roomId);
+                sessionMap.put(id, new SessionInfo(user, room));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -36,16 +40,39 @@ public class StompConnectListener {
         }
         if (event instanceof SessionDisconnectEvent){
             String id = SimpAttributesContextHolder.currentAttributes().getSessionId();
-            sessionToUserMap.remove(id);
+            sessionMap.remove(id);
             return;
         }
     }
 
-    public static Optional<User> getUserForSession(String sessionId){
-        if (sessionToUserMap.containsKey(sessionId)) {
-            return Optional.of(sessionToUserMap.get(sessionId));
+    public static Optional<SessionInfo> getSession(String sessionId){
+        if (sessionMap.containsKey(sessionId)) {
+            return Optional.of(sessionMap.get(sessionId));
         }
         return Optional.empty();
+    }
+    
+    public static class SessionInfo{
+        private User user;
+        private Room room;
+
+        public SessionInfo(User user, Room room) {
+            this.user = user;
+            this.room = room;
+        }
+
+        public User getUser() {
+            return user;
+        }
+        public void setUser(User user) {
+            this.user = user;
+        }
+        public Room getRoom() {
+            return room;
+        }
+        public void setRoom(Room room) {
+            this.room = room;
+        }
     }
 
 }

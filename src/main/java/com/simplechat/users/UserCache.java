@@ -9,6 +9,8 @@ public interface UserCache {
 
     public User signUpNewUser(String username, String password) throws UserAlreadyExistsException, BadUserOrPassException;
 
+    public User getUser(String username) throws UserNotFoundException;
+
     @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="User not found.")
     public static class UserNotFoundException extends Exception{};
 

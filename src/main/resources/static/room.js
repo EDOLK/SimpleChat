@@ -28,6 +28,7 @@ function updateScrollButton() {
 
 async function initialLoad() {
     if (!roomId) return;
+    document.cookie = "roomId = " + roomId + ";path=/"
     await loadAllMessages(roomId);
     client = new Client({
         brokerURL: "/ws",
@@ -122,8 +123,7 @@ async function sendMessage() {
     client.publish({
         destination: '/app/chat/sendmessage',
         body: JSON.stringify({
-            message: content,
-            roomId: roomId
+            message: content
         })
     });
 
