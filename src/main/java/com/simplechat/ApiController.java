@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.socket.CloseStatus;
 
+import com.simplechat.WebsocketSessionTracker.SessionRequest;
 import com.simplechat.cookies.Cookies;
 import com.simplechat.cookies.Cookies.InvalidCookieException;
 import com.simplechat.rooms.Room;
@@ -48,7 +50,7 @@ public class ApiController {
     public Room getNewRoom(@RequestBody RoomRequest request, @CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
         User user = Cookies.getUser(userCookie);
         Room room = Rooms.getRoomCache().makeRoom(request, user);
-        room.sendMessage(new RoomMessage("John Computer", "Your room id is: " + room.getRoomId()));
+        room.sendMessage(new RoomMessage("John Computer", "Your room id is: " + room.getRoomId(), RoomMessage.UserRole.BOT));
         return room;
     }
 
@@ -71,13 +73,27 @@ public class ApiController {
     ) throws Exception{
         Room room = Rooms.getRoomCache().getRoomById(roomId);
         User requester = Cookies.getUser(userCookie);
-        if (room.getOwner() == requester) {
+        if (room.getOwner().equals(requester)) {
             User toBeBanned = Users.getUserCache().getUser(username);
-            if (room.ban(toBeBanned)) {
+            if (ban(toBeBanned, room)) {
                 return ResponseEntity.ok().build();
             }
         }
         throw new InvalidRoomPermissionException();
+    }
+
+    public static boolean ban(User user, Room room){
+        if (room.addBannedUser(user)) {
+            WebsocketSessionTracker.getSessions(new SessionRequest(user, room)).forEach((i) -> {
+                try {
+                    i.getSession().close(CloseStatus.NORMAL);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            return true;
+        }
+        return false;
     }
 
     @DeleteMapping("/api/rooms/{roomId}/banned")
@@ -88,9 +104,9 @@ public class ApiController {
     ) throws Exception{
         Room room = Rooms.getRoomCache().getRoomById(roomId);
         User requester = Cookies.getUser(userCookie);
-        if (room.getOwner() == requester) {
+        if (room.getOwner().equals(requester)) {
             User toBeUnBanned = Users.getUserCache().getUser(username);
-            if (room.unBan(toBeUnBanned)) {
+            if (room.removeBannedUser(toBeUnBanned)) {
                 return ResponseEntity.ok().build();
             }
         }
@@ -105,9 +121,9 @@ public class ApiController {
     ) throws Exception{
         Room room = Rooms.getRoomCache().getRoomById(roomId);
         User requester = Cookies.getUser(userCookie);
-        if (room.getOwner() == requester) {
+        if (room.getOwner().equals(requester)) {
             User toBeMuted = Users.getUserCache().getUser(username);
-            if (room.mute(toBeMuted)) {
+            if (room.addMutedUser(toBeMuted)) {
                 return ResponseEntity.ok().build();
             }
         }
@@ -122,9 +138,9 @@ public class ApiController {
     ) throws Exception{
         Room room = Rooms.getRoomCache().getRoomById(roomId);
         User requester = Cookies.getUser(userCookie);
-        if (room.getOwner() == requester) {
+        if (room.getOwner().equals(requester)) {
             User toBeUnMuted = Users.getUserCache().getUser(username);
-            if (room.unMute(toBeUnMuted)) {
+            if (room.removeMutedUser(toBeUnMuted)) {
                 return ResponseEntity.ok().build();
             }
         }
@@ -144,7 +160,7 @@ public class ApiController {
     public ResponseEntity<Void> deleteRoom(@PathVariable String roomId, @CookieValue(name = "userCookie", required = true) String userCookie) throws Exception{
         User user = Cookies.getUser(userCookie);
         Room room = Rooms.getRoomCache().getRoomById(roomId);
-        if (room.getOwner() == user) {
+        if (room.getOwner().equals(user)) {
             Rooms.getRoomCache().deleteRoom(room);
             return ResponseEntity.ok().build();
         }

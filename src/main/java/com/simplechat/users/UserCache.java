@@ -7,7 +7,7 @@ public interface UserCache {
 
     public User authenticate(String username, String password) throws UserNotFoundException, InvalidCredentialsException ;
 
-    public User signUpNewUser(String username, String password) throws UserAlreadyExistsException, BadUserOrPassException;
+    public User signUpNewUser(String username, String password) throws UserAlreadyExistsException, BadUserOrPassException, UserNotRegisteredException;
 
     public User getUser(String username) throws UserNotFoundException;
 

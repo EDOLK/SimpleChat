@@ -59,7 +59,7 @@ async function loadAllMessages(roomId){
 
 function loadMessage(message) {
     const shouldAutoScroll = isAtBottom();
-    const username = message.username;
+    var username = message.username || "Anonymous";
     const content = message.content;
 
     const wrapper = document.createElement("div");
@@ -67,7 +67,20 @@ function loadMessage(message) {
 
     const userEl = document.createElement("div");
     userEl.className = "message-username";
-    userEl.textContent = username || "Anonymous";
+
+    if (message.role == "OWNER") {
+        username = username + " 👑";
+    }
+
+    if (message.role == "MOD") {
+        username = username + " 🛡️";
+    }
+
+    if (message.role == "BOT") {
+        username = username + " 🤖";
+    }
+
+    userEl.textContent = username;
 
     const contentEl = document.createElement("div");
     contentEl.className = "message-content";

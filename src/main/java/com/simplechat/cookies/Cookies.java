@@ -18,7 +18,7 @@ public class Cookies {
 
     public static String getCookie(User user) throws OvenBrokenException{
         Optional<String> cOpt = cookieMap.entrySet().stream()
-            .filter((e) -> e.getValue() == user)
+            .filter((e) -> e.getValue().equals(user))
             .map((e) -> e.getKey())
             .findFirst();
         if (cOpt.isPresent()) {

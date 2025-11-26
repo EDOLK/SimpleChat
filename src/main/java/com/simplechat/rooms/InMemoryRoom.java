@@ -18,6 +18,7 @@ public class InMemoryRoom implements Room{
     private final boolean roomPublic;
     private final Set<User> bannedUsers = new HashSet<>();
     private final Set<User> mutedUsers = new HashSet<>();
+    private final Set<User> moddedUsers = new HashSet<>();
     private User owner;
 
     @Override
@@ -79,22 +80,37 @@ public class InMemoryRoom implements Room{
     }
 
     @Override
-    public boolean ban(User user) {
+    public boolean addBannedUser(User user) {
         return bannedUsers.add(user);
     }
 
     @Override
-    public boolean mute(User user) {
+    public boolean addMutedUser(User user) {
         return mutedUsers.add(user);
     }
 
     @Override
-    public boolean unBan(User user) {
+    public boolean removeBannedUser(User user) {
         return bannedUsers.remove(user);
     }
 
     @Override
-    public boolean unMute(User user) {
+    public boolean removeMutedUser(User user) {
         return mutedUsers.remove(user);
+    }
+
+    @Override
+    public Collection<User> getMods() {
+        return moddedUsers;
+    }
+
+    @Override
+    public boolean addMod(User user) {
+        return moddedUsers.add(user);
+    }
+
+    @Override
+    public boolean removeMod(User user) {
+        return moddedUsers.remove(user);
     }
 }

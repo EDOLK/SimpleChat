@@ -48,7 +48,7 @@ public class UserCookieInterceptor implements HandshakeInterceptor {
         }
 
         if (userCookie == null || roomId == null) {
-            return false; // deny connection
+            return false;
         } 
 
         User user = null;

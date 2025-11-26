@@ -2,7 +2,7 @@ package com.simplechat.users;
 
 public class Users {
 
-    public static UserCache userCache = new InMemoryUserCache();
+    private static UserCache userCache = new InMemoryUserCache();
 
     private Users() {}
 

@@ -1,6 +1,7 @@
 package com.simplechat.users;
 
 import java.util.HashMap;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -23,8 +24,9 @@ public class InMemoryUserCache implements UserCache {
     }
 
     @Override
-    public User signUpNewUser(String username, String password) throws UserAlreadyExistsException, BadUserOrPassException{
-        if (username.isBlank() || password.isBlank()) {
+    public User signUpNewUser(String username, String password) throws UserAlreadyExistsException, BadUserOrPassException, UserNotRegisteredException{
+        username = username.strip();
+        if (username.isBlank() || password.isBlank() || !username.matches("^\\w+$")) {
             throw new BadUserOrPassException();
         }
         if (!users.containsKey(username)) {
@@ -33,6 +35,11 @@ public class InMemoryUserCache implements UserCache {
             return user;
         }
         throw new UserAlreadyExistsException();
+    }
+
+    @Override
+    public User getUser(String username) throws UserNotFoundException {
+        return users.get(username);
     }
 
 }
