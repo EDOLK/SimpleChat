@@ -2,12 +2,9 @@ package com.simplechat.rooms;
 
 public class SendMessageRequest {
 
-    private String roomId;
-
     private String message;
 
-    public SendMessageRequest(String roomId, String message) {
-        this.roomId = roomId;
+    public SendMessageRequest(String message) {
         this.message = message;
     }
 
@@ -15,7 +12,4 @@ public class SendMessageRequest {
         return message;
     }
 
-    public String getRoomId() {
-        return roomId;
-    }
 }

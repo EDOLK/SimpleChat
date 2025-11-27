@@ -6,9 +6,17 @@ public class RoomMessage{
 
     private String content;
 
+    private UserRole role;
+
     public RoomMessage(String username, String content) {
         this.username = username;
         this.content = content;
+    }
+
+    public RoomMessage(String username, String content, UserRole role) {
+        this.username = username;
+        this.content = content;
+        this.role = role;
     }
 
     public String getUsername() {
@@ -25,6 +33,18 @@ public class RoomMessage{
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public static enum UserRole{
+        OWNER, MOD, BOT,
     }
 
 }
